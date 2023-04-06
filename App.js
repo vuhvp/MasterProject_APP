@@ -1,11 +1,10 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useState } from "react";
 import { Button, StyleSheet, View } from 'react-native';
+import { SocketContext, socket } from './context/socket';
 import CameraScreen from './screens/CameraScreen';
 import ImageScreen from './screens/ImageScreen';
-
 
 function HomeScreen({ navigation }) {
   return (
@@ -19,21 +18,23 @@ const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
-    <NavigationContainer>
-      <Stack.Navigator
-        screenOptions={{
-          headerShown: false
-        }}
-      >
-        <Stack.Screen
-          name="Home"
-          component={HomeScreen}
-          options={{ title: 'Home' }}
-        />
-        <Stack.Screen name="CameraScreen" component={CameraScreen} />
-        <Stack.Screen name="ImageScreen" component={ImageScreen} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <SocketContext.Provider value={socket}>
+      <NavigationContainer>
+        <Stack.Navigator
+          screenOptions={{
+            headerShown: false
+          }}
+        >
+          <Stack.Screen
+            name="Home"
+            component={HomeScreen}
+            options={{ title: 'Home' }}
+          />
+          <Stack.Screen name="CameraScreen" component={CameraScreen} />
+          <Stack.Screen name="ImageScreen" component={ImageScreen} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </SocketContext.Provider>
   );
 }
 

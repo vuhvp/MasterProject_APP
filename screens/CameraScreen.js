@@ -1,8 +1,8 @@
 import { Camera, CameraType } from 'expo-camera';
 import { Image } from 'expo-image';
+import { FlipType, SaveFormat, manipulateAsync } from 'expo-image-manipulator';
 import { useState } from 'react';
-import { Button, StyleSheet, Text, TouchableOpacity, View, Dimensions } from 'react-native';
-import { manipulateAsync, FlipType, SaveFormat } from 'expo-image-manipulator';
+import { Button, Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function CameraScreen({ navigation }) {
     const [type, setType] = useState(CameraType.front);
@@ -17,7 +17,6 @@ export default function CameraScreen({ navigation }) {
 
     if (!permission.granted) {
         // Camera permissions are not granted yet
-
         return (
             <View style={styles.container}>
                 <Text style={{ textAlign: 'center' }}>We need your permission to show the camera</Text>
@@ -32,7 +31,7 @@ export default function CameraScreen({ navigation }) {
 
     async function takePicture() {
         if (camera) {
-            let photo = await camera.takePictureAsync(null);
+            let photo = await camera.takePictureAsync();
             if (type === CameraType.front) {
                 photo = await manipulateAsync(
                     photo.localUri || photo.uri,
@@ -40,10 +39,9 @@ export default function CameraScreen({ navigation }) {
                         { rotate: 180 },
                         { flip: FlipType.Vertical },
                     ],
-                    { compress: 1, format: SaveFormat.PNG }
+                    { compress: 1, format: SaveFormat.JPEG }
                 );
             }
-            // setImageUri(photo.uri);
             navigation.navigate('ImageScreen', { imageUri: photo.uri })
         }
     };
@@ -66,7 +64,6 @@ export default function CameraScreen({ navigation }) {
                     <TouchableOpacity style={styles.captureBtn} onPress={takePicture} />
                     <TouchableOpacity style={styles.flipBtn} onPress={toggleCameraType}>
                         <Image
-
                             style={styles.flipIcon}
                             source={require('../assets/flip.png')}
                             transition={1000}
