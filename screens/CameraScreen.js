@@ -1,14 +1,38 @@
 import { Camera, CameraType } from 'expo-camera';
 import { Image } from 'expo-image';
 import { FlipType, SaveFormat, manipulateAsync } from 'expo-image-manipulator';
-import { useState } from 'react';
-import { Button, Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useState, useMemo } from 'react';
+import { Button, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import RadioGroup from 'react-native-radio-buttons-group';
 
-export default function CameraScreen({ navigation }) {
+export default function CameraScreen({ route, navigation }) {
     const [type, setType] = useState(CameraType.front);
     const [permission, requestPermission] = Camera.useCameraPermissions();
     const [camera, setCamera] = useState(null);
-    const [screen, setScreen] = useState(Dimensions.get('window'))
+
+
+    const radioButtons = useMemo(() => ([
+        {
+            id: '1',
+            label: 'Boy',
+            value: 'boy',
+            color: 'white',
+            labelStyle: {
+                color: 'white'
+            }
+        },
+        {
+            id: '2',
+            label: 'Girl',
+            value: 'girl',
+            color: 'white',
+            labelStyle: {
+                color: 'white'
+            }
+        }
+    ]), []);
+
+    const [selectedId, setSelectedId] = useState('1');
 
     if (!permission) {
         // Camera permissions are still loading
@@ -39,25 +63,43 @@ export default function CameraScreen({ navigation }) {
                         { rotate: 180 },
                         { flip: FlipType.Vertical },
                     ],
-                    { compress: 1, format: SaveFormat.JPEG }
+                    { compress: 1, format: SaveFormat.PNG }
                 );
             }
-            navigation.navigate('ImageScreen', { imageUri: photo.uri })
+
+            navigation.navigate('ImageScreen', { imageUri: photo.uri, room: route.params.room })
         }
     };
-
-    const cameraSize = Math.round((screen.width * 70) / 100)
 
     return (
         <View style={styles.container}>
             <View style={styles.cameraContainer}>
-                <View style={[styles.cameraBorder, { width: cameraSize, height: cameraSize, borderRadius: cameraSize / 2 }]}>
-                    <Camera
-                        ref={(ref) => setCamera(ref)}
-                        style={styles.camera}
-                        type={type}
+                <Text style={styles.text}>Please adjust your face to fit the image</Text>
+                {
+                    selectedId === '1' ? <Image
+                        style={styles.backgroundFace}
+                        source={require('../assets/boy.png')}
+                        contentFit='contain'
+                    /> : <Image
+                        style={styles.backgroundFace}
+                        source={require('../assets/girl.png')}
+                        contentFit='contain'
+                    />
+                }
+
+                <View style={styles.radioGroup}>
+                    <RadioGroup
+                        radioButtons={radioButtons}
+                        onPress={setSelectedId}
+                        selectedId={selectedId}
+                        layout='row'
                     />
                 </View>
+                <Camera
+                    ref={(ref) => setCamera(ref)}
+                    style={styles.camera}
+                    type={type}
+                />
             </View>
             <View style={styles.buttonContainer}>
                 <View style={{ width: '100%', alignItems: 'center' }}>
@@ -81,10 +123,28 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     cameraContainer: {
-        flex: 3,
-        justifyContent: 'flex-end',
-        alignItems: 'center',
+        flex: 10,
+        position: 'relative'
+    },
+    text: {
+        position: 'absolute',
+        top: 100,
+        left: 0,
+        width: '100%',
+        height: 20,
+        textAlign: 'center',
+        color: 'white',
+        zIndex: 2,
         backgroundColor: 'black',
+        opacity: 0.5
+    },
+    backgroundFace: {
+        flex: 1,
+        zIndex: 2
+    },
+    radioGroup: {
+        zIndex: 2,
+        alignItems: 'center',
     },
     cameraBorder: {
         borderColor: 'green',
@@ -94,7 +154,10 @@ const styles = StyleSheet.create({
     },
     camera: {
         width: '100%',
-        height: '100%'
+        height: '100%',
+        position: 'absolute',
+        top: 0,
+        left: 0
     },
     buttonContainer: {
         flex: 2,

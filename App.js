@@ -1,16 +1,29 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
-import { Button, StyleSheet, View } from 'react-native';
+import React, { useState } from 'react';
+import { Button, StyleSheet, TextInput, View, Text } from 'react-native';
 import { SocketContext, socket } from './context/socket';
 import CameraScreen from './screens/CameraScreen';
 import ImageScreen from './screens/ImageScreen';
 
 function HomeScreen({ navigation }) {
+  const [text, onChangeText] = useState('');
+
+  function onConnect() {
+    socket.emit('join', text)
+    navigation.navigate('CameraScreen', { room: text })
+  }
   return (
     <View style={styles.container}>
       <StatusBar style="auto" />
-      <Button title='Connect' onPress={() => navigation.navigate('CameraScreen')} />
+      <Text style={{ textAlign: 'center' }}>ID</Text>
+      <TextInput
+        style={styles.input}
+        onChangeText={onChangeText}
+        value={text}
+      />
+      <Button title='Connect' onPress={onConnect} />
     </View>
   );
 }
@@ -45,4 +58,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  input: {
+    width: '50%',
+    height: 40,
+    borderWidth: 1,
+  }
 });

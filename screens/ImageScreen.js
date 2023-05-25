@@ -1,8 +1,8 @@
 import { Image } from 'expo-image';
-import { SaveFormat, manipulateAsync } from 'expo-image-manipulator';
 import { useContext, useEffect, useState } from 'react';
 import { Button, StyleSheet, View } from 'react-native';
 import { SocketContext } from '../context/socket';
+import { SaveFormat, manipulateAsync } from 'expo-image-manipulator';
 
 export default function ImageScreen({ route, navigation }) {
     const socket = useContext(SocketContext);
@@ -16,15 +16,27 @@ export default function ImageScreen({ route, navigation }) {
         const photo = await manipulateAsync(
             imageUri,
             [
-                { resize: { width: 90, height: 90 } },
+                { resize: { width: 300 } },
             ],
             { compress: 1, format: SaveFormat.PNG, base64: true }
         );
-        socket.emit('imageUri', photo.base64)
+        socket.emit('imageUriFromApp', { uri: photo.base64, room: route.params.room })
     }
 
     function retake() {
         navigation.goBack()
+    }
+
+    function createFormData(uri) {
+        const fileName = uri.split('/').pop();
+        const fileType = fileName.split('.').pop();
+        const formData = new FormData();
+        formData.append('file', {
+            uri,
+            name: fileName,
+            type: `image/${fileType}`
+        });
+        return formData;
     }
 
     return (
